@@ -1,7 +1,22 @@
 import os as _os
 import logging
+
 from subprocess import Popen, PIPE
 
+INFO_DISPLAY_LEVEL_NUM = 9 
+logging.addLevelName(INFO_DISPLAY_LEVEL_NUM, "INFODISP")
+
+def infoDisp(self, message, *args, **kws):
+	# Yes, logger takes its '*args' as 'args'.
+
+	if self.isEnabledFor(INFO_DISPLAY_LEVEL_NUM):
+		self._log(INFO_DISPLAY_LEVEL_NUM, message, args, **kws) 
+
+logging.Logger.infoDisp = infoDisp
+
+_log = logging.getLogger(name="copyMove")
+
+logging.basicConfig(level=9)
 
 def getFiles(path, allowed=None):
 	"""	provieds files for provided path
@@ -12,7 +27,7 @@ def getFiles(path, allowed=None):
 			format to exclude files.
 	"""
 
-	allowed = allowed or ['.jpg']
+	allowed = allowed or ['.mp4']
 	allFiles = []
 	filesAndFolders = _os.listdir(path)
 	for item in filesAndFolders:
@@ -43,13 +58,13 @@ def _buildTasks(filePaths, toPath, processType='cp', args=''):
 
 
 def executeTasks(tasks):
-	print "{0} tasks to perform.".format(len(tasks))
+	_log.infoDisp("{0} tasks to perform.".format(len(tasks)))
 	for task in tasks:
 		process = Popen(task, stdout=PIPE, stderr=PIPE)
 		stdout, stderr = process.communicate()
 		print stdout, stderr
 
-tasks = _buildTasks(getFiles('/Users/sanjeevkumar/Desktop'), '/Users/sanjeevkumar/Pictures/delete/', processType='mv')
+tasks = _buildTasks(getFiles('/Users/sanjeevkumar/Desktop'), '/Users/sanjeevkumar/Pictures/delete/', processType='cp', args='-rf')
 
 executeTasks(tasks)
 
